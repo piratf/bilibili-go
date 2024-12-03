@@ -370,3 +370,44 @@ func (c *Client) GetSelfFavourList() ([]SelfFavourList, error) {
 	)
 	return execute[[]SelfFavourList](c, method, url, nil)
 }
+
+type GetCollectionListParam struct {
+	Ps          int    `json:"ps" query:"ps"`                                         // 每页项数，定义域 1 - 大于70
+	Pn          int    `json:"pn" query:"pn"`                                         // 页码
+	UpMid       int    `json:"up_mid" query:"up_mid"`                                 // 目标用户mid
+	Platform    string `json:"platform,omitempty" query:"platform,omitempty"`         // 平台类型，填写web 返回值才会包含用户收藏的视频合集
+	WebLocation string `json:"web_location,omitempty" query:"web_location,omitempty"` // 网页位置
+}
+
+type CollectionList struct {
+	Count int `json:"count"` // 创建的收藏夹数
+	List  []struct {
+		Id    int    `json:"id"`    // 收藏夹mlid
+		Fid   int    `json:"fid"`   // 原始收藏夹mlid
+		Mid   int    `json:"mid"`   // 创建用户mid
+		Attr  int    `json:"attr"`  // 收藏夹属性
+		Title string `json:"title"` // 收藏夹标题
+		Cover string `json:"cover"` // 收藏夹封面图片url
+		Upper struct {
+			Mid  int    `json:"mid"`  // 创建人mid
+			Name string `json:"name"` // 创建人昵称
+			Face string `json:"face"` // 空
+		} `json:"upper"` // 收藏夹创建用户信息
+		CoverType  int    `json:"cover_type"`  // 2
+		Intro      string `json:"intro"`       // 空
+		Ctime      int    `json:"ctime"`       // 创建时间
+		Mtime      int    `json:"mtime"`       // 审核时间
+		State      int    `json:"state"`       // 0: 正常；1: 收藏夹已失效
+		FavState   int    `json:"fav_state"`   // 0
+		MediaCount int    `json:"media_count"` // 收藏夹总计视频数
+	} `json:"list"` // 收藏夹列表
+}
+
+// GetFavCollectionList 获取关注的合集列表
+func (c *Client) GetFavCollectionList(param *GetCollectionListParam) (CollectionList, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/v3/fav/folder/collected/list"
+	)
+	return execute[CollectionList](c, method, url, param)
+}
