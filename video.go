@@ -1,7 +1,9 @@
 package bilibili
 
 import (
+	"encoding/json"
 	"github.com/go-resty/resty/v2"
+	"github.com/pkg/errors"
 )
 
 type VideoParam struct {
@@ -209,42 +211,42 @@ type ArgueInfo struct {
 }
 
 type VideoInfo struct {
-	Bvid               string        `json:"bvid"`         // 稿件bvid
-	Aid                int           `json:"aid"`          // 稿件avid
-	Videos             int           `json:"videos"`       // 稿件分P总数。默认为1
-	Tid                int           `json:"tid"`          // 分区tid
-	Tname              string        `json:"tname"`        // 子分区名称
-	Copyright          int           `json:"copyright"`    // 视频类型。1：原创。2：转载
-	Pic                string        `json:"pic"`          // 稿件封面图片url
-	Title              string        `json:"title"`        // 稿件标题
-	Pubdate            int           `json:"pubdate"`      // 稿件发布时间。秒级时间戳
-	Ctime              int           `json:"ctime"`        // 用户投稿时间。秒级时间戳
-	Desc               string        `json:"desc"`         // 视频简介
-	DescV2             []DescV2      `json:"desc_v2"`      // 新版视频简介
-	State              int           `json:"state"`        // 视频状态。详情见[属性数据文档](attribute_data.md#state字段值(稿件状态))
-	Duration           int           `json:"duration"`     // 稿件总时长(所有分P)。单位为秒
-	Forward            int           `json:"forward"`      // 撞车视频跳转avid。仅撞车视频存在此字段
-	MissionId          int           `json:"mission_id"`   // 稿件参与的活动id
-	RedirectUrl        string        `json:"redirect_url"` // 重定向url。仅番剧或影视视频存在此字段。用于番剧&影视的av/bv->ep
-	Rights             VideoRights   `json:"rights"`       // 视频属性标志
-	Owner              Owner         `json:"owner"`        // 视频UP主信息
-	Stat               VideoStat     `json:"stat"`         // 视频状态数
-	Dynamic            string        `json:"dynamic"`      // 视频同步发布的的动态的文字内容
-	Cid                int           `json:"cid"`          // 视频1P cid
-	Dimension          Dimension     `json:"dimension"`    // 视频1P分辨率
-	Premiere           any           `json:"premiere"`     // null
-	TeenageMode        int           `json:"teenage_mode"`
-	IsChargeableSeason bool          `json:"is_chargeable_season"`
-	IsStory            bool          `json:"is_story"`
-	NoCache            bool          `json:"no_cache"` // 作用尚不明确
-	Pages              []VideoPage   `json:"pages"`    // 视频分P列表
-	Subtitle           VideoSubtitle `json:"subtitle"` // 视频CC字幕信息
-	Staff              []Staff       `json:"staff"`    // 合作成员列表。非合作视频无此项
-	IsSeasonDisplay    bool          `json:"is_season_display"`
-	UserGarb           UserGarb      `json:"user_garb"` // 用户装扮信息
-	HonorReply         HonorReply    `json:"honor_reply"`
-	LikeIcon           string        `json:"like_icon"`
-	ArgueInfo          ArgueInfo     `json:"argue_info"` // 争议/警告信息
+	Bvid               string         `json:"bvid"`         // 稿件bvid
+	Aid                int            `json:"aid"`          // 稿件avid
+	Videos             int            `json:"videos"`       // 稿件分P总数。默认为1
+	Tid                int            `json:"tid"`          // 分区tid
+	Tname              string         `json:"tname"`        // 子分区名称
+	Copyright          int            `json:"copyright"`    // 视频类型。1：原创。2：转载
+	Pic                string         `json:"pic"`          // 稿件封面图片url
+	Title              string         `json:"title"`        // 稿件标题
+	Pubdate            int            `json:"pubdate"`      // 稿件发布时间。秒级时间戳
+	Ctime              int            `json:"ctime"`        // 用户投稿时间。秒级时间戳
+	Desc               string         `json:"desc"`         // 视频简介
+	DescV2             []DescV2       `json:"desc_v2"`      // 新版视频简介
+	State              int            `json:"state"`        // 视频状态。详情见[属性数据文档](attribute_data.md#state字段值(稿件状态))
+	Duration           int            `json:"duration"`     // 稿件总时长(所有分P)。单位为秒
+	Forward            int            `json:"forward"`      // 撞车视频跳转avid。仅撞车视频存在此字段
+	MissionId          int            `json:"mission_id"`   // 稿件参与的活动id
+	RedirectUrl        string         `json:"redirect_url"` // 重定向url。仅番剧或影视视频存在此字段。用于番剧&影视的av/bv->ep
+	Rights             VideoRights    `json:"rights"`       // 视频属性标志
+	Owner              Owner          `json:"owner"`        // 视频UP主信息
+	Stat               VideoStat      `json:"stat"`         // 视频状态数
+	Dynamic            string         `json:"dynamic"`      // 视频同步发布的的动态的文字内容
+	Cid                int            `json:"cid"`          // 视频1P cid
+	Dimension          Dimension      `json:"dimension"`    // 视频1P分辨率
+	Premiere           any            `json:"premiere"`     // null
+	TeenageMode        int            `json:"teenage_mode"`
+	IsChargeableSeason bool           `json:"is_chargeable_season"`
+	IsStory            bool           `json:"is_story"`
+	NoCache            bool           `json:"no_cache"` // 作用尚不明确
+	Pages              []VideoPage    `json:"pages"`    // 视频分P列表
+	Subtitle           VideoSubtitles `json:"subtitle"` // 视频CC字幕信息
+	Staff              []Staff        `json:"staff"`    // 合作成员列表。非合作视频无此项
+	IsSeasonDisplay    bool           `json:"is_season_display"`
+	UserGarb           UserGarb       `json:"user_garb"` // 用户装扮信息
+	HonorReply         HonorReply     `json:"honor_reply"`
+	LikeIcon           string         `json:"like_icon"`
+	ArgueInfo          ArgueInfo      `json:"argue_info"` // 争议/警告信息
 }
 
 // GetVideoInfo 获取视频详细信息
@@ -678,4 +680,189 @@ func (c *Client) GetVideoStream(param GetVideoStreamParam) (*GetVideoStreamResul
 		url    = "https://api.bilibili.com/x/player/wbi/playurl"
 	)
 	return execute[*GetVideoStreamResult](c, method, url, param, fillWbiHandler(c.wbi, c.GetCookies()))
+}
+
+type GetVideoConclusionParam struct {
+	Aid   int    `json:"aid,omitempty" request:"query,omitempty"`  // 稿件 avid。avid 与 bvid 任选一个
+	Bvid  string `json:"bvid,omitempty" request:"query,omitempty"` // 稿件 bvid。avid 与 bvid 任选一个
+	Cid   int    `json:"cid"`                                      // 视频 cid
+	UpMid int    `json:"up_mid"`                                   // UP 主 mid
+}
+
+type VideoConclusionResult struct {
+	Code        int                        `json:"code"`         // -1: 不支持AI摘要（敏感内容等）或其他因素导致请求异常 0: 有摘要 1：无摘要（未识别到语音）
+	ModelResult VideoConclusionModelResult `json:"model_result"` // 摘要内容
+	Stid        string                     `json:"stid"`         // 摘要 id 如code=1且该字段为0时，则未进行 AI 总结，即添加总结队列 如code=1且该字段为空时未识别到语音
+	Status      int                        `json:"status"`       // 未知
+	LikeNum     int                        `json:"like_num"`     // 点赞数 默认为0
+	DislikeNum  int                        `json:"dislike_num"`  // 点踩数 默认为0
+}
+
+type VideoConclusionModelResult struct {
+	ResultType int                      `json:"result_type"` // 数据类型 0: 没有摘要 1：仅存着摘要总结 2：存着摘要以及提纲
+	Summary    string                   `json:"summary"`     // 视频摘要 通常为一段概括整个视频内容的文本
+	Outline    []VideoConclusionOutline `json:"outline"`     // 分段提纲 通常为视频中叙述的各部分及其要点, 有数据时：array 无数据时：null
+}
+
+type VideoConclusionOutline struct {
+	Title       string                       `json:"title"`        // 分段标题 段落内容的概括
+	PartOutline []VideoConclusionPartOutline `json:"part_outline"` // 分段要点 当前分段中多个提到的细节
+	TimeStamp   int                          `json:"timestamp"`    // 分段起始时间 单位为秒
+}
+
+type VideoConclusionPartOutline struct {
+	TimeStamp int    `json:"timestamp"` // 要点起始时间 单位为秒
+	Content   string `json:"content"`   // 小结内容 其中一个分段的要点
+}
+
+// GetVideoConclusion 获取官方 AI 视频摘要
+func (c *Client) GetVideoConclusion(param GetVideoConclusionParam) (*VideoConclusionResult, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/web-interface/view/conclusion/get"
+	)
+	return execute[*VideoConclusionResult](c, method, url, param, fillCsrf(c), fillWbiHandler(c.wbi, c.GetCookies()))
+}
+
+type GetVideoPlayerMetaInfoParam struct {
+	Aid      int    `json:"aid,omitempty" request:"query,omitempty"`       // 稿件 avid。avid 与 bvid 任选一个
+	Bvid     string `json:"bvid,omitempty" request:"query,omitempty"`      // 稿件 bvid。avid 与 bvid 任选一个
+	Cid      int    `json:"cid"`                                           // 视频 cid
+	SeasonId int    `json:"season_id,omitempty" request:"query,omitempty"` // 视频合集 ID 番剧 season_id
+	EpId     int    `json:"ep_id,omitempty" request:"query,omitempty"`     // 视频分集 ID 剧集 ep_id
+}
+
+type VideoPlayerMetaInfoOptions struct {
+	Is360      bool `json:"is_360"`      // 是否 360 全景视频
+	WithoutVip bool `json:"without_vip"` // 未知
+}
+
+type VideoPlayerMetaInfoBgmInfo struct {
+	MusicId    string `json:"music_id"`    // 音乐 id
+	MusicTitle string `json:"music_title"` // 音乐标题
+	JumpUrl    string `json:"jump_url"`    // 跳转 URL
+}
+
+type VideoPlayerMetaInfoDmMask struct {
+	Cid     int    `json:"cid"`      // 视频 cid
+	Plat    int    `json:"plat"`     // 未知
+	Fps     int    `json:"fps"`      // webmask 取样 fps
+	Time    int    `json:"time"`     // 未知
+	MaskUrl string `json:"mask_url"` // webmask 资源 url
+}
+
+type VideoPlayerMetaInfoSubtitle struct {
+	AllowSubmit bool                              `json:"allow_submit"` // true
+	Lan         string                            `json:"lan"`          // ""
+	LanDoc      string                            `json:"lan_doc"`      // ""
+	Subtitles   []VideoPlayerMetaInfoSubtitleItem `json:"subtitles"`    // 不登录为 `[]`
+}
+
+type VideoPlayerMetaInfoSubtitleItem struct {
+	AiStatus    int    `json:"ai_status"`    // 未知
+	AiType      int    `json:"ai_type"`      // 未知
+	Id          int    `json:"id"`           // 未知
+	IdStr       string `json:"id_str"`       // 未知
+	IsLock      bool   `json:"is_lock"`      // 未知
+	Lan         string `json:"lan"`          // 语言类型英文字母缩写
+	LanDoc      string `json:"lan_doc"`      // 语言类型中文名称
+	SubtitleUrl string `json:"subtitle_url"` // 资源 url 地址
+	Type        int    `json:"type"`         // 0
+}
+
+type VideoPlayerMetaInfoViewPoint struct {
+	Content string `json:"content"` // 章节名
+	From    int    `json:"from"`    // 未知
+	To      int    `json:"to"`      // 未知
+	Type    int    `json:"type"`    // 未知
+	ImgUrl  string `json:"imgUrl"`  // 图片资源地址
+	LogoUrl string `json:"logoUrl"` // ""
+}
+
+type VideoPlayerMetaInfo struct {
+	Aid               int                            `json:"aid"`                  // 视频 aid
+	Bvid              string                         `json:"bvid"`                 // 视频 bvid
+	AllowBp           bool                           `json:"allow_bp"`             // 未知
+	NoShare           bool                           `json:"no_share"`             // 禁止分享?
+	Cid               int                            `json:"cid"`                  // 视频 cid
+	DmMask            VideoPlayerMetaInfoDmMask      `json:"dm_mask"`              // webmask 防挡字幕信息
+	Subtitle          VideoPlayerMetaInfoSubtitle    `json:"subtitle"`             // 字幕信息
+	ViewPoints        []VideoPlayerMetaInfoViewPoint `json:"view_points"`          // 章节看点信息
+	IpInfo            any                            `json:"ip_info"`              // 请求 IP 信息
+	LoginMid          int                            `json:"login_mid"`            // 登录用户 mid
+	LoginMidHash      string                         `json:"login_mid_hash"`       // 未知
+	IsOwner           bool                           `json:"is_owner"`             // 是否为该视频 UP 主
+	Name              string                         `json:"name"`                 // 未知
+	Permission        string                         `json:"permission"`           // 未知
+	LevelInfo         any                            `json:"level_info"`           // 登录用户等级信息
+	Vip               any                            `json:"vip"`                  // 登录用户 VIP 信息
+	AnswerStatus      int                            `json:"answer_status"`        // 答题状态
+	BlockTime         int                            `json:"block_time"`           // 封禁时间?
+	Role              string                         `json:"role"`                 // 未知
+	LastPlayTime      int                            `json:"last_play_time"`       // 上次观看时间?
+	LastPlayCid       int                            `json:"last_play_cid"`        // 上次观看 cid?
+	NowTime           int                            `json:"now_time"`             // 当前 UNIX 秒级时间戳
+	OnlineCount       int                            `json:"online_count"`         // 在线人数
+	NeedLoginSubtitle bool                           `json:"need_login_subtitle"`  // 是否必须登陆才能查看字幕
+	PreviewToast      string                         `json:"preview_toast"`        // `为创作付费，购买观看完整视频|购买观看`
+	Options           VideoPlayerMetaInfoOptions     `json:"options"`              // 未知
+	GuideAttention    any                            `json:"guide_attention"`      // 未知
+	JumpCard          any                            `json:"jump_card"`            // 未知
+	OperationCard     any                            `json:"operation_card"`       // 未知
+	OnlineSwitch      any                            `json:"online_switch"`        // 未知
+	Fawkes            any                            `json:"fawkes"`               // 播放器相关信息?
+	ShowSwitch        any                            `json:"show_switch"`          // 未知
+	BgmInfo           VideoPlayerMetaInfoBgmInfo     `json:"bgm_info"`             // 背景音乐信息
+	ToastBlock        bool                           `json:"toast_block"`          // 未知
+	IsUpowerExclusive bool                           `json:"is_upower_exclusive"`  // 充电专属?
+	IsUpowerPlay      bool                           `json:"is_upower_play"`       // 未知
+	IsUgcPayPreview   bool                           `json:"is_ugc_pay_preview"`   // 未知
+	ElecHighLevel     any                            `json:"elec_high_level"`      // 未知
+	DisableShowUpInfo bool                           `json:"disable_show_up_info"` // 未知
+}
+
+// GetVideoPlayerMetaInfo 获取视频播放器元信息
+func (c *Client) GetVideoPlayerMetaInfo(param GetVideoPlayerMetaInfoParam) (*VideoPlayerMetaInfo, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/player/wbi/v2"
+	)
+	return execute[*VideoPlayerMetaInfo](c, method, url, param)
+}
+
+type VideoPlayerSubtitleItem struct {
+	From     float64 `json:"from"`     // 字幕开始时间
+	To       float64 `json:"to"`       // 字幕结束时间
+	Sid      int     `json:"sid"`      // 字幕 ID
+	Location int     `json:"location"` // 未知
+	Content  string  `json:"content"`  // 字幕内容
+	Music    float64 `json:"music"`    // 未知
+}
+
+type VideoPlayerSubtitle struct {
+	FontSize        float64                   `json:"font_size"`        // 字体大小
+	FontColor       string                    `json:"font_color"`       // 字体颜色
+	BackgroundAlpha float64                   `json:"background_alpha"` // 背景透明度
+	BackgroundColor string                    `json:"background_color"` // 背景颜色
+	Stroke          string                    `json:"Stroke"`           // 未知
+	Type            string                    `json:"type"`             // 字幕类型
+	Lang            string                    `json:"lang"`             // 字幕语言
+	Version         string                    `json:"version"`          // 字幕版本
+	Body            []VideoPlayerSubtitleItem `json:"body"`             // 字幕内容
+}
+
+// GetVideoPlayerSubtitle 获取视频播放器字幕
+// subtitleUrl: 从 GetVideoPlayerMetaInfo 获取的 Subtitle.Subtitles[x].SubtitleUrl
+func (c *Client) GetVideoPlayerSubtitle(subtitleUrl string) (*VideoPlayerSubtitle, error) {
+	res, err := c.Resty().NewRequest().Get("https:" + subtitleUrl)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to get video player subtitle")
+	}
+
+	data := new(VideoPlayerSubtitle)
+	if err := json.Unmarshal(res.Body(), data); err != nil {
+		return nil, errors.Wrap(err, "Failed to unmarshal video player subtitle")
+	}
+
+	return data, nil
 }
