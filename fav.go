@@ -413,14 +413,15 @@ func (c *Client) GetFavCollectionList(param *GetCollectionListParam) (Collection
 }
 
 type UnFavCollectionParam struct {
-	SeasonId int `json:"season_id"` // 视频合集 ID
+	SeasonId int    `json:"season_id"` // 视频合集 ID
+	Platform string `json:"platform"`  // 平台
 }
 
 // UnFavCollection 取消关注合集
 func (c *Client) UnFavCollection(param *UnFavCollectionParam) (string, error) {
 	const (
-		method = resty.MethodGet
+		method = resty.MethodPost
 		url    = "https://api.bilibili.com/x/v3/fav/season/unfav"
 	)
-	return execute[string](c, method, url, param)
+	return execute[string](c, method, url, param, fillCsrf(c))
 }
